@@ -15,6 +15,56 @@ class wcall{
 		add_action( 'wp_enqueue_scripts',array($this,'wcall_scripts_method') );
 		add_action('wp_head',array($this,'customjs'));
 
+		
+	}
+
+	
+
+	function customjs(){
+		?>
+		<script type="text/javascript">
+			var ajaxurl = "<?php echo admin_url('admin-ajax.php'); ?>";
+			// alert(ajaxurl);
+		</script>
+		<?php
+	}
+
+	function wcall_scripts_method(){
+		wp_register_script( 'wcall', plugin_dir_url( __FILE__ ) . '/js/wcall.js', array( 'jquery' ) );
+	}
+
+	public function wcall_menu_page(){
+		add_menu_page( 'Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings',array($this,'wcall_settings'));
+	}
+
+	public function wcall_settings(){
+		 require_once("views/settings.php");
+	}
+}
+
+new wcall();
+
+// Register and load the widget
+function wcall_load_widget() {
+    register_widget( 'wcall_widget' );
+}
+add_action( 'widgets_init', 'wcall_load_widget' );
+
+// Creating the widget 
+class wcall_widget extends WP_Widget {
+	function __construct() {
+		parent::__construct(
+		 
+		// Base ID of your widget
+		'wcall_widget', 
+		 
+		// Widget name will appear in UI
+		__('Wcall Widget', 'wcall_widget_domain'), 
+		 
+		// Widget description
+		array( 'description' => __( 'Widget that call rest api', 'wcall_widget_domain' ), ) 
+		);
+
 		add_action( 'wp_ajax_wcallgetdata', array($this,'wcallgetdata_func') );
 		add_action( 'wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func') );
 	}
@@ -56,55 +106,11 @@ class wcall{
 		die;
 	}
 
-	function customjs(){
-		?>
-		<script type="text/javascript">
-			var ajaxurl = "<?php echo admin_url('admin-ajax.php'); ?>";
-			// alert(ajaxurl);
-		</script>
-		<?php
-	}
-
-	function wcall_scripts_method(){
-		wp_enqueue_script( 'wcall', plugin_dir_url( __FILE__ ) . '/js/wcall.js', array( 'jquery' ) );
-	}
-
-	public function wcall_menu_page(){
-		add_menu_page( 'Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings',array($this,'wcall_settings'));
-	}
-
-	public function wcall_settings(){
-		 require_once("views/settings.php");
-	}
-}
-
-new wcall();
-
-// Register and load the widget
-function wcall_load_widget() {
-    register_widget( 'wcall_widget' );
-}
-add_action( 'widgets_init', 'wcall_load_widget' );
-
-// Creating the widget 
-class wcall_widget extends WP_Widget {
-	function __construct() {
-		parent::__construct(
-		 
-		// Base ID of your widget
-		'wcall_widget', 
-		 
-		// Widget name will appear in UI
-		__('Wcall Widget', 'wcall_widget_domain'), 
-		 
-		// Widget description
-		array( 'description' => __( 'Widget that call rest api', 'wcall_widget_domain' ), ) 
-		);
-	}
-
 	// Creating widget front-end
  
 	public function widget( $args, $instance ) {
+		wp_enqueue_script('wcall');
+
 		$title = apply_filters( 'widget_title', $instance['title'] );
 		 
 		// before and after widget arguments are defined by themes
