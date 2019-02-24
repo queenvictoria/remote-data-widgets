@@ -75,6 +75,7 @@ class wcall_widget extends WP_Widget {
 			$host=trim(get_option("wcall_host"),"/");
 			$path=trim($_POST['pathname'],"/");
 			$cacheage=trim($_POST['cacheage']);
+			$widgetid=$_POST['widgetid'];
 			$resturl=$host."/".$path."/";
 
 			// $response = wp_remote_get( add_query_arg( array(
@@ -84,7 +85,7 @@ class wcall_widget extends WP_Widget {
 			parse_str(trim($_POST['initargs']),$args);
 			// print_r($args);die;
 
-			$cachedata=get_transient(md5($path));
+			$cachedata=get_transient($widgetid);
 
 			if(!$cachedata){
 				$response = wp_remote_get( add_query_arg($args,$resturl) );
@@ -94,7 +95,7 @@ class wcall_widget extends WP_Widget {
 					// $response=$response['body'];
 					$result=array('status'=>true,'msg'=>"",'data'=>$remote_posts);
 
-					set_transient(md5($path),$result, 60*60*$cacheage );
+					set_transient($widgetid,$result, 60*60*$cacheage );
 				}
 			}else{
 				$result=$cachedata;
@@ -123,7 +124,7 @@ class wcall_widget extends WP_Widget {
 		?>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
-				new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>'}).getData(function(data){
+				new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>'}).getData(function(data){
 					console.log("sdf",data);
 				});
 			});

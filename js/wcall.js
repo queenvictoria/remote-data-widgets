@@ -2,7 +2,8 @@ var wcallcls=function(options){
 	var vars={
 		pathname:null,
 		initargs:null,
-		cacheage:null
+		cacheage:null,
+		widgetid:null
 	}
 
 	var root=this;
@@ -11,10 +12,11 @@ var wcallcls=function(options){
 		jQuery.ajax({
 		  method:"POST",
 		  url: ajaxurl,
-		  data: { pathname:vars.pathname, initargs:vars.initargs,cacheage:vars.cacheage,action:"wcallgetdata"}
+		  data: { pathname:vars.pathname, initargs:vars.initargs,cacheage:vars.cacheage,action:"wcallgetdata",widgetid:vars.widgetid}
 		})
 		  .done(function( msg ) {
 		  	var obj=jQuery.parseJSON(msg);
+		  	obj.widgetid=vars.widgetid;
 		    callback(obj);
 		  });
 	}
