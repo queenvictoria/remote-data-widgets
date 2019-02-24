@@ -122,10 +122,12 @@ class wcall_widget extends WP_Widget {
 		// print_r($instance);die;
 		// This is where you run the code and display the output
 		?>
+		<textarea name="placeholder"></textarea>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
 				new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>'}).getData(function(data){
 					console.log("sdf",data);
+					jQuery("#"+data.widgetid+" textarea").val(JSON.stringify(data));
 				});
 			});
 		</script>
