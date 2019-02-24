@@ -20,10 +20,11 @@ class wcall{
 	}
 
 	function wcallgetdata_func(){
-		$response=array('status'=>false,'msg'=>"Unknown erro!");
+		$result=array('status'=>false,'msg'=>"Unknown erro!");
 		if(isset($_POST['pathname'])){
 			$host=trim(get_option("wcall_host"),"/");
 			$path=trim($_POST['pathname'],"/");
+			$cacheage=trim($_POST['cacheage']);
 			$resturl=$host."/".$path."/";
 
 			// $response = wp_remote_get( add_query_arg( array(
@@ -33,16 +34,25 @@ class wcall{
 			parse_str(trim($_POST['initargs']),$args);
 			// print_r($args);die;
 
-			$response = wp_remote_get( add_query_arg($args,$resturl) );
+			$cachedata=get_transient(md5($path));
 
-			if( !is_wp_error( $response ) && $response['response']['code'] == 200 ) {
-				$remote_posts = json_decode( $response['body'] );
-				// $response=$response['body'];
-				$response=array('status'=>true,'msg'=>"",'data'=>$remote_posts);
+			if(!$cachedata){
+				$response = wp_remote_get( add_query_arg($args,$resturl) );
+
+				if( !is_wp_error( $response ) && $response['response']['code'] == 200 ) {
+					$remote_posts = json_decode( $response['body'] );
+					// $response=$response['body'];
+					$result=array('status'=>true,'msg'=>"",'data'=>$remote_posts);
+
+					set_transient(md5($path),$result, 60*60*$cacheage );
+				}
+			}else{
+				$result=$cachedata;
 			}
+			
 		}
 
-		echo json_encode($response);
+		echo json_encode($result);
 		die;
 	}
 
