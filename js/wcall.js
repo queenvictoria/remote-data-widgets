@@ -6,13 +6,13 @@ var wcallcls = function(options) {
     initargs: null,
     cacheage: null,
     widgetid: null,
-    weburl:null,
+    url:      null,
   };
 
   this.getData = function(callback) {
     jQuery.ajax({
         method: "POST",
-        url: opts.weburl + "/wp-json/wcall/v1/getdata",
+        url: opts.url,
         data: {
           pathname: opts.pathname,
           initargs: opts.initargs,
@@ -21,8 +21,7 @@ var wcallcls = function(options) {
           widgetid: opts.widgetid
         }
       })
-      .done(function( obj ) {
-        obj.widgetid = opts.widgetid;
+      .done(function(obj) {
         callback(obj);
       });
   }

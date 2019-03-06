@@ -45,6 +45,9 @@ add_action('widgets_init', 'wcall_load_widget');
 
 // Creating the widget
 class wcall_widget extends WP_Widget {
+  public static $base_path = 'wcall/v1';
+  public static $update_fragment = 'getdata';
+
   function __construct() {
     parent::__construct(
 
@@ -58,12 +61,13 @@ class wcall_widget extends WP_Widget {
       array('description' => __('Provide remote API data to the sidebar', 'wcall_widget_domain'),)
     );
 
+
     add_action('rest_api_init', array($this, 'call_to_custom_widget'));
   }
 
   // @FIX This gets called once per widget. Register it with the plugin instead?
   function call_to_custom_widget() {
-    register_rest_route( 'wcall/v1', '/getdata', array(
+    register_rest_route($this::$base_path, '/' . $this::$update_fragment, array(
       'methods' => 'POST',
       'callback' => array($this, 'wcallgetdata_func'),
     ));
@@ -85,14 +89,13 @@ class wcall_widget extends WP_Widget {
       $cachedata = get_transient($widgetid);
 
       if (!$cachedata) {
+        error_log("Cache miss for ${widgetid}.");
         $response = wp_remote_get(add_query_arg($args, $resturl));
 
         if (!is_wp_error($response) && $response['response']['code'] == 200) {
           $remote_posts = json_decode($response['body']);
-          // $response=$response['body'];
           $result = array('status' => true, 'msg' => "",'data' => $remote_posts);
-
-          set_transient($widgetid,$result, 60*60*$cacheage);
+          set_transient($widgetid, $result, 60 * 60 * $cacheage);
         }
       } else {
         $result = $cachedata;
@@ -106,6 +109,9 @@ class wcall_widget extends WP_Widget {
   // Creating widget front-end
   public function widget($args, $instance) {
     wp_enqueue_script('wcall');
+
+    $fragments = array('', 'wp-json', $this::$base_path, $this::$update_fragment);
+    $url = join('/', $fragments);
 
     $title = apply_filters('widget_title', $instance['title']);
 
@@ -122,11 +128,11 @@ class wcall_widget extends WP_Widget {
     <script type="text/javascript">
       jQuery(document).ready(function() {
         new wcallcls({
-          pathname:'<?php echo $instance['pathname']; ?>',
-          initargs:'<?php echo $instance['initargs']; ?>',
-          cacheage:'<?php echo $instance['cache']; ?>',
-          widgetid:'<?php echo $this->id; ?>',
-          weburl:'<?php echo trim(site_url(),"/"); ?>'
+          pathname: '<?php echo $instance['pathname']; ?>',
+          initargs: '<?php echo $instance['initargs']; ?>',
+          cacheage: '<?php echo $instance['cache']; ?>',
+          widgetid: '<?php echo $this->id; ?>',
+          url:      '<?php echo $url; ?>'
         });
       });
     </script>
