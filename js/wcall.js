@@ -28,6 +28,13 @@ var wcallcls = function(options) {
   }
 
   /*
+   * Create the initial view.
+   */
+  this.createView = function() {
+    this.updateView();
+  }
+
+  /*
    * Update the data and then update the contents.
    */
   this.updateView = function() {
@@ -62,6 +69,8 @@ var wcallcls = function(options) {
 
     // Do any preflight items while in testing.
     this.test();
+
+    this.createView();
   };
 
   /*

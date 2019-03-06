@@ -55,7 +55,7 @@ class wcall_widget extends WP_Widget {
       __('Wcall Widget', 'wcall_widget_domain'),
 
       // Widget description
-      array('description' => __('Widget that call rest api', 'wcall_widget_domain'),)
+      array('description' => __('Provide remote API data to the sidebar', 'wcall_widget_domain'),)
     );
 
     add_action('rest_api_init', array($this, 'call_to_custom_widget'));
@@ -81,7 +81,6 @@ class wcall_widget extends WP_Widget {
 
       // @FIX This is not a good argument name.
       parse_str(trim($_POST['initargs']),$args);
-      // print_r($args);die;
 
       $cachedata = get_transient($widgetid);
 
@@ -122,9 +121,12 @@ class wcall_widget extends WP_Widget {
     <textarea name="placeholder"></textarea>
     <script type="text/javascript">
       jQuery(document).ready(function() {
-        new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>',weburl:'<?php echo trim(site_url(),"/"); ?>'}).getData(function(data) {
-          console.log("sdf",data);
-          jQuery("#"+data.widgetid+" textarea").val(JSON.stringify(data));
+        new wcallcls({
+          pathname:'<?php echo $instance['pathname']; ?>',
+          initargs:'<?php echo $instance['initargs']; ?>',
+          cacheage:'<?php echo $instance['cache']; ?>',
+          widgetid:'<?php echo $this->id; ?>',
+          weburl:'<?php echo trim(site_url(),"/"); ?>'
         });
       });
     </script>
