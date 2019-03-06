@@ -12,7 +12,7 @@ var wcallcls = function(options) {
   this.getData = function(callback) {
     jQuery.ajax({
         method: "POST",
-        url: opts.weburl+"/wp-json/wcall/v1/getdata",
+        url: opts.weburl + "/wp-json/wcall/v1/getdata",
         data: {
           pathname: opts.pathname,
           initargs: opts.initargs,
@@ -22,7 +22,6 @@ var wcallcls = function(options) {
         }
       })
       .done(function( obj ) {
-        // var obj = jQuery.parseJSON(msg);
         obj.widgetid = opts.widgetid;
         callback(obj);
       });

@@ -31,7 +31,7 @@ class wcall{
   }
 
   public function wcall_settings() {
-     require_once("views/settings.php");
+    require_once("views/settings.php");
   }
 }
 
@@ -39,7 +39,7 @@ new wcall();
 
 // Register and load the widget
 function wcall_load_widget() {
-    register_widget('wcall_widget');
+  register_widget('wcall_widget');
 }
 add_action('widgets_init', 'wcall_load_widget');
 
@@ -58,18 +58,19 @@ class wcall_widget extends WP_Widget {
       array('description' => __('Widget that call rest api', 'wcall_widget_domain'),)
     );
 
-    add_action( 'rest_api_init', array($this,'call_to_custom_widget'));
+    add_action('rest_api_init', array($this, 'call_to_custom_widget'));
   }
 
-  function call_to_custom_widget(){
-      register_rest_route( 'wcall/v1', '/getdata', array(
-          'methods' => 'POST',
-          'callback' => array($this,'wcallgetdata_func'),
-      ));
+  // @FIX This gets called once per widget. Register it with the plugin instead?
+  function call_to_custom_widget() {
+    register_rest_route( 'wcall/v1', '/getdata', array(
+      'methods' => 'POST',
+      'callback' => array($this, 'wcallgetdata_func'),
+    ));
   }
 
   function wcallgetdata_func() {
-    $result = array('status' => false,'msg' => "Unknown error!");
+    $result = array('status' => false, 'msg' => "Unknown error!");
     if (isset($_POST['pathname'])) {
       // @FIX Unnecessarily scoped option.
       $host = trim(get_option("wcall_host"), "/");
@@ -78,10 +79,6 @@ class wcall_widget extends WP_Widget {
       $widgetid = $_POST['widgetid'];
       $resturl = $host . "/" . $path . "/";
 
-      // $response = wp_remote_get(add_query_arg(array(
-      //        'per_page' => 2
-      //     ), '/wp-json/wp/v2/posts'));
-
       // @FIX This is not a good argument name.
       parse_str(trim($_POST['initargs']),$args);
       // print_r($args);die;
@@ -89,7 +86,7 @@ class wcall_widget extends WP_Widget {
       $cachedata = get_transient($widgetid);
 
       if (!$cachedata) {
-        $response = wp_remote_get(add_query_arg($args,$resturl));
+        $response = wp_remote_get(add_query_arg($args, $resturl));
 
         if (!is_wp_error($response) && $response['response']['code'] == 200) {
           $remote_posts = json_decode($response['body']);
@@ -98,10 +95,9 @@ class wcall_widget extends WP_Widget {
 
           set_transient($widgetid,$result, 60*60*$cacheage);
         }
-      }else{
-        $result=$cachedata;
+      } else {
+        $result = $cachedata;
       }
-
     }
 
     echo json_encode($result);
@@ -109,7 +105,6 @@ class wcall_widget extends WP_Widget {
   }
 
   // Creating widget front-end
-
   public function widget($args, $instance) {
     wp_enqueue_script('wcall');
 
