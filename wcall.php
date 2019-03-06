@@ -20,7 +20,10 @@ class wcall{
     add_action('admin_menu', array($this,'wcall_menu_page'));
     add_action('wp_enqueue_scripts',array($this,'wcall_scripts_method'));
     add_action('wp_head',array($this,'customjs'));
+    
   }
+
+  
 
   // @FIX Specifically asked to **not** use admin-ajax.
   function customjs() {
@@ -73,8 +76,16 @@ class wcall_widget extends WP_Widget {
     // @FIX I expressly asked that you didn't use these hooks.
     // They are intend for admin use only.
     // Use the REST API.
-    add_action('wp_ajax_wcallgetdata', array($this,'wcallgetdata_func'));
-    add_action('wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func'));
+    // add_action('wp_ajax_wcallgetdata', array($this,'wcallgetdata_func'));
+    // add_action('wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func'));
+    add_action( 'rest_api_init', array($this,'call_to_custom_widget'));
+  }
+
+  function call_to_custom_widget(){
+      register_rest_route( 'wcall/v1', '/getdata', array(
+          'methods' => 'POST',
+          'callback' => array($this,'wcallgetdata_func'),
+      ));
   }
 
   function wcallgetdata_func() {
@@ -136,7 +147,7 @@ class wcall_widget extends WP_Widget {
     <textarea name="placeholder"></textarea>
     <script type="text/javascript">
       jQuery(document).ready(function() {
-        new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>'}).getData(function(data) {
+        new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>',weburl:'<?php echo trim(site_url(),"/"); ?>'}).getData(function(data) {
           console.log("sdf",data);
           jQuery("#"+data.widgetid+" textarea").val(JSON.stringify(data));
         });
