@@ -16,14 +16,14 @@ License:
 // @FIX Code documentation.
 // @FIX Remove comments that aren't documentation.
 class wcall{
-  public function __construct(){
+  public function __construct() {
     add_action('admin_menu', array($this,'wcall_menu_page'));
     add_action('wp_enqueue_scripts',array($this,'wcall_scripts_method'));
     add_action('wp_head',array($this,'customjs'));
   }
 
   // @FIX Specifically asked to **not** use admin-ajax.
-  function customjs(){
+  function customjs() {
     ?>
     <script type="text/javascript">
       var ajaxurl = "<?php echo admin_url('admin-ajax.php'); ?>";
@@ -32,17 +32,17 @@ class wcall{
     <?php
   }
 
-  function wcall_scripts_method(){
+  function wcall_scripts_method() {
     wp_register_script('wcall', plugin_dir_url(__FILE__) . '/js/wcall.js', array('jquery'));
   }
 
   // @FIX Don't use a custom top level menu.
   // @FIX Do add configuration link to plugin menu.
-  public function wcall_menu_page(){
+  public function wcall_menu_page() {
     add_menu_page('Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings', array($this,'wcall_settings'));
   }
 
-  public function wcall_settings(){
+  public function wcall_settings() {
      require_once("views/settings.php");
   }
 }
@@ -77,9 +77,9 @@ class wcall_widget extends WP_Widget {
     add_action('wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func'));
   }
 
-  function wcallgetdata_func(){
-    $result=array('status' => false,'msg' => "Unknown error!");
-    if(isset($_POST['pathname'])){
+  function wcallgetdata_func() {
+    $result = array('status' => false,'msg' => "Unknown error!");
+    if (isset($_POST['pathname'])) {
       // @FIX Unnecessarily scoped option.
       $host = trim(get_option("wcall_host"), "/");
       $path = trim($_POST['pathname'], "/");
@@ -95,15 +95,15 @@ class wcall_widget extends WP_Widget {
       parse_str(trim($_POST['initargs']),$args);
       // print_r($args);die;
 
-      $cachedata=get_transient($widgetid);
+      $cachedata = get_transient($widgetid);
 
-      if(!$cachedata){
+      if (!$cachedata) {
         $response = wp_remote_get(add_query_arg($args,$resturl));
 
-        if(!is_wp_error($response) && $response['response']['code'] == 200) {
+        if (!is_wp_error($response) && $response['response']['code'] == 200) {
           $remote_posts = json_decode($response['body']);
           // $response=$response['body'];
-          $result=array('status'=>true,'msg'=>"",'data'=>$remote_posts);
+          $result = array('status' => true, 'msg' => "",'data' => $remote_posts);
 
           set_transient($widgetid,$result, 60*60*$cacheage);
         }
@@ -135,8 +135,8 @@ class wcall_widget extends WP_Widget {
     ?>
     <textarea name="placeholder"></textarea>
     <script type="text/javascript">
-      jQuery(document).ready(function(){
-        new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>'}).getData(function(data){
+      jQuery(document).ready(function() {
+        new wcallcls({pathname:'<?php echo $instance['pathname']; ?>',initargs:'<?php echo $instance['initargs']; ?>',cacheage:'<?php echo $instance['cache']; ?>',widgetid:'<?php echo $this->id; ?>'}).getData(function(data) {
           console.log("sdf",data);
           jQuery("#"+data.widgetid+" textarea").val(JSON.stringify(data));
         });

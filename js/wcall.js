@@ -10,13 +10,13 @@ var wcallcls = function(options) {
 
   this.getData = function(callback) {
     jQuery.ajax({
-        method:"POST",
+        method: "POST",
         url: ajaxurl,
         data: {
           pathname: opts.pathname,
           initargs: opts.initargs,
           cacheage: opts.cacheage,
-          action:"wcallgetdata",
+          action: "wcallgetdata",
           widgetid: opts.widgetid
         }
       })
