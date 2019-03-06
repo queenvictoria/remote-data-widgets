@@ -2,10 +2,10 @@
 /*
 Plugin Name: Dynamic Widget Call
 Plugin URI:
-Description: This plugin will dynamically call rest api
-Version: 0.1
-Author: Seema Kumari
-Author Email: seemi1026@gmail.com
+Description: Provide data from a remote REST endpoint via the Wordpress Transient API to the Widget sidebar via the Wordpress REST API.
+Version: 0.1.1
+Author: Seema Kumari and Snow
+Author Email: webmaster@hol.ly
 License:
 */
 
