@@ -11,7 +11,6 @@ License:
 
 
 // @FIX Rename everything to Remote Data Widgets.
-// @FIX Consistent whitespace.
 // @FIX PSR formatting. Note autoformatting this breaks the plugin completely.
 // @FIX Code documentation.
 // @FIX Remove comments that aren't documentation.
@@ -19,20 +18,6 @@ class wcall{
   public function __construct() {
     add_action('admin_menu', array($this,'wcall_menu_page'));
     add_action('wp_enqueue_scripts',array($this,'wcall_scripts_method'));
-    add_action('wp_head',array($this,'customjs'));
-    
-  }
-
-  
-
-  // @FIX Specifically asked to **not** use admin-ajax.
-  function customjs() {
-    ?>
-    <script type="text/javascript">
-      var ajaxurl = "<?php echo admin_url('admin-ajax.php'); ?>";
-      // alert(ajaxurl);
-    </script>
-    <?php
   }
 
   function wcall_scripts_method() {
@@ -73,11 +58,6 @@ class wcall_widget extends WP_Widget {
       array('description' => __('Widget that call rest api', 'wcall_widget_domain'),)
     );
 
-    // @FIX I expressly asked that you didn't use these hooks.
-    // They are intend for admin use only.
-    // Use the REST API.
-    // add_action('wp_ajax_wcallgetdata', array($this,'wcallgetdata_func'));
-    // add_action('wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func'));
     add_action( 'rest_api_init', array($this,'call_to_custom_widget'));
   }
 
