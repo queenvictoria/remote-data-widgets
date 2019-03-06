@@ -39,7 +39,7 @@ class wcall{
   // @FIX Don't use a custom top level menu.
   // @FIX Do add configuration link to plugin menu.
   public function wcall_menu_page(){
-    add_menu_page('Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings',array($this,'wcall_settings'));
+    add_menu_page('Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings', array($this,'wcall_settings'));
   }
 
   public function wcall_settings(){
@@ -60,16 +60,19 @@ class wcall_widget extends WP_Widget {
   function __construct() {
     parent::__construct(
 
-    // Base ID of your widget
-    'wcall_widget',
+      // Base ID of your widget
+      'wcall_widget',
 
-    // Widget name will appear in UI
-    __('Wcall Widget', 'wcall_widget_domain'),
+      // Widget name will appear in UI
+      __('Wcall Widget', 'wcall_widget_domain'),
 
-    // Widget description
-    array('description' => __('Widget that call rest api', 'wcall_widget_domain'),)
-   );
+      // Widget description
+      array('description' => __('Widget that call rest api', 'wcall_widget_domain'),)
+    );
 
+    // @FIX I expressly asked that you didn't use these hooks.
+    // They are intend for admin use only.
+    // Use the REST API.
     add_action('wp_ajax_wcallgetdata', array($this,'wcallgetdata_func'));
     add_action('wp_ajax_nopriv_wcallgetdata', array($this,'wcallgetdata_func'));
   }
