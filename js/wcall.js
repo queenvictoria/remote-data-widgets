@@ -2,21 +2,17 @@
 // @FIX Whitespace.
 var wcallcls = function(options) {
   var opts = {
-    pathname: null,
     initargs: null,
-    cacheage: null,
     widgetid: null,
     url:      null,
   };
 
-  this.getData = function(callback) {
+  this.getData = function(remote_args, callback) {
     jQuery.ajax({
         method: "POST",
         url: opts.url,
         data: {
-          pathname: opts.pathname,
-          initargs: opts.initargs,
-          cacheage: opts.cacheage,
+          remote_args: remote_args,
           action: "wcallgetdata",
           widgetid: opts.widgetid
         }
@@ -40,7 +36,7 @@ var wcallcls = function(options) {
     var self = this;
 
     var container = jQuery("#" + opts.widgetid);
-    self.getData(function(data) {
+    self.getData({}, function(data) {
       jQuery("textarea", container).val(JSON.stringify(data, null, 2));
     });
   }

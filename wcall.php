@@ -66,39 +66,67 @@ class wcall_widget extends WP_Widget {
   }
 
   // @FIX This gets called once per widget. Register it with the plugin instead?
+  // @FIX Create one per widget so we can scope the callback function too and
+  // not need to pass around the widget number.
   function call_to_custom_widget() {
-    register_rest_route($this::$base_path, '/' . $this::$update_fragment, array(
+    $route = '/' . $this->_get_local_rest_route();
+    register_rest_route($this::$base_path, $route, array(
       'methods' => 'POST',
       'callback' => array($this, 'wcallgetdata_func'),
     ));
   }
 
+  function _get_local_rest_route() {
+    // Include the number in the route.
+    // NOTE: This still gets destroyed and only one route is maintained.
+    // $fragments = array($this::$update_fragment, $this->number);
+    $fragments = array($this::$update_fragment);
+    return join('/', $fragments);
+  }
+
+  function _get_local_rest_uri() {
+    $fragments = array('', 'wp-json', $this::$base_path, $this->_get_local_rest_route());
+    return join('/', $fragments);
+  }
+
+  function _get_remote_rest_uri($widget_id) {
+    $host = trim(get_option("wcall_host"), "/");
+    $path = $this->_get_widget_option($widget_id, 'pathname', '');
+    return implode('/', array($host, $path));
+  }
+
+  function _get_widget_option($widget_id, $option_name, $default) {
+    $widget_instance = end(explode('-', $widget_id));
+    $settings = get_option($this->option_name);
+    $options = $settings[$widget_instance];
+    if ( $options[$option_name] )
+      return $options[$option_name];
+    return $default;
+  }
+
   function wcallgetdata_func() {
     $result = array('status' => false, 'msg' => "Unknown error!");
-    if (isset($_POST['pathname'])) {
-      // @FIX Unnecessarily scoped option.
-      $host = trim(get_option("wcall_host"), "/");
-      $path = trim($_POST['pathname'], "/");
-      $cacheage = trim($_POST['cacheage']);
-      $widgetid = $_POST['widgetid'];
-      $resturl = $host . "/" . $path . "/";
-
-      // @FIX This is not a good argument name.
-      parse_str(trim($_POST['initargs']),$args);
-
-      $cachedata = get_transient($widgetid);
+    if (isset($_POST['widgetid'])) {
+      $widget_id = $_POST['widgetid'];
+      $cachedata = get_transient($widget_id);
 
       if (!$cachedata) {
-        error_log("Cache miss for ${widgetid}.");
-        $response = wp_remote_get(add_query_arg($args, $resturl));
+        $uri = $this->_get_remote_rest_uri($widget_id);
+        parse_str(trim($_POST['remote_args']), $args);
+        $response = wp_remote_get(add_query_arg($args, $uri));
 
         if (!is_wp_error($response) && $response['response']['code'] == 200) {
-          $remote_posts = json_decode($response['body']);
-          $result = array('status' => true, 'msg' => "",'data' => $remote_posts);
-          set_transient($widgetid, $result, 60 * 60 * $cacheage);
+          $body = json_decode($response['body']);
+          if ( $body ) {
+            $result = array('status' => true, 'msg' => '','data' => $body);
+            $cache_expiration = $this->_get_widget_option($widget_id, 'cache', 0);
+            set_transient($widget_id, $result, 60 * 60 * $cache_expiration);
+            $result['cached'] = false;
+          }
         }
       } else {
         $result = $cachedata;
+        $result['cached'] = true;
       }
     }
 
@@ -110,8 +138,7 @@ class wcall_widget extends WP_Widget {
   public function widget($args, $instance) {
     wp_enqueue_script('wcall');
 
-    $fragments = array('', 'wp-json', $this::$base_path, $this::$update_fragment);
-    $url = join('/', $fragments);
+    $url = $this->_get_local_rest_uri();
 
     $title = apply_filters('widget_title', $instance['title']);
 
@@ -128,9 +155,7 @@ class wcall_widget extends WP_Widget {
     <script type="text/javascript">
       jQuery(document).ready(function() {
         new wcallcls({
-          pathname: '<?php echo $instance['pathname']; ?>',
           initargs: '<?php echo $instance['initargs']; ?>',
-          cacheage: '<?php echo $instance['cache']; ?>',
           widgetid: '<?php echo $this->id; ?>',
           url:      '<?php echo $url; ?>'
         });
