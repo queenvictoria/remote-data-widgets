@@ -5,6 +5,7 @@ var wcallcls = function(options) {
     initargs: null,
     widgetid: null,
     url:      null,
+    testing:  true,
   };
 
   this.getData = function(remote_args, callback) {
@@ -63,7 +64,8 @@ var wcallcls = function(options) {
     jQuery.extend(opts, options);
 
     // Do any preflight items while in testing.
-    this.test();
+    if ( opts.testing )
+      this.test();
 
     this.createView();
   };
