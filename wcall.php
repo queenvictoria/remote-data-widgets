@@ -120,7 +120,9 @@ class wcall_widget extends WP_Widget {
           if ( $body ) {
             $result = array('status' => true, 'msg' => '','data' => $body);
             $cache_expiration = $this->_get_widget_option($widget_id, 'cache', 0);
-            set_transient($widget_id, $result, 60 * 60 * $cache_expiration);
+            if ( intval($cache_expiration) ) {
+              set_transient($widget_id, $result, 60 * 60 * $cache_expiration);
+            }
             $result['cached'] = false;
           }
         }
@@ -214,7 +216,7 @@ class wcall_widget extends WP_Widget {
     <p>
       <label for="<?php echo $this->get_field_id('cache'); ?>"><?php _e('Cache max-age:'); ?></label>
       <input class="widefat" id="<?php echo $this->get_field_id('cache'); ?>" name="<?php echo $this->get_field_name('cache'); ?>" type="text" value="<?php echo esc_attr($cache); ?>" />
-      <span style="font-size: 12px;">Specify in hours</span>
+      <span style="font-size: 12px;">Specify the maximum length to cache the response in hours. Use 0 to never cache the data.</span>
     </p>
     <?php
   }
