@@ -21,13 +21,13 @@ class remote_data_widgets{
   }
 
   function wp_enqueue_scripts() {
-    wp_register_script('wcall', plugin_dir_url(__FILE__) . '/js/wcall.js', array('jquery'));
+    wp_register_script('remote_data_widgets', plugin_dir_url(__FILE__) . '/js/remote_data_widgets.js', array('jquery'));
   }
 
   // @FIX Don't use a custom top level menu.
   // @FIX Do add configuration link to plugin menu.
   public function admin_menu() {
-    add_menu_page('Remote data widgets', 'Remote data widgets', 'manage_options', 'wcall-settings', array($this, 'settings'));
+    add_options_page('Remote data widgets', 'Remote data widgets', 'manage_options', 'remote-data-widgets-settings', array($this, 'settings'));
   }
 
   public function settings() {
@@ -68,7 +68,7 @@ class remote_data_widget extends WP_Widget {
   // @FIX This gets called once per widget. Register it with the plugin instead?
   // @FIX Create one per widget so we can scope the callback function too and
   // not need to pass around the widget number.
-  function call_to_custom_widget() {
+  public function call_to_custom_widget() {
     $route = '/' . $this->_get_local_rest_route();
     register_rest_route($this::$base_path, $route, array(
       'methods' => 'POST',
@@ -90,7 +90,7 @@ class remote_data_widget extends WP_Widget {
   }
 
   function _get_remote_rest_uri($widget_id) {
-    $host = trim(get_option("wcall_host"), "/");
+    $host = trim(get_option("remote_data_widgets_remote_host"), "/");
     $path = $this->_get_widget_option($widget_id, 'pathname', '');
     return implode('/', array($host, $path));
   }
@@ -138,7 +138,7 @@ class remote_data_widget extends WP_Widget {
 
   // Creating widget front-end
   public function widget($args, $instance) {
-    wp_enqueue_script('wcall');
+    wp_enqueue_script('remote_data_widgets');
 
     $url = $this->_get_local_rest_uri();
 
