@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Dynamic Widget Call
+Plugin Name: Remote data widgets
 Plugin URI:
-Description: Provide data from a remote REST endpoint via the Wordpress Transient API to the Widget sidebar via the Wordpress REST API.
+Description: Provide data from a remote REST endpoint via the Wordpress Transient API to the Widget sidebar via the Wordpress REST API. This is a base widget from which you can build other widgets.
 Version: 0.1.1
 Author: Seema Kumari and Snow
 Author Email: webmaster@hol.ly
@@ -14,51 +14,51 @@ License:
 // @FIX PSR formatting. Note autoformatting this breaks the plugin completely.
 // @FIX Code documentation.
 // @FIX Remove comments that aren't documentation.
-class wcall{
+class remote_data_widgets{
   public function __construct() {
-    add_action('admin_menu', array($this,'wcall_menu_page'));
-    add_action('wp_enqueue_scripts',array($this,'wcall_scripts_method'));
+    add_action('admin_menu', array($this,'admin_menu'));
+    add_action('wp_enqueue_scripts', array($this, 'wp_enqueue_scripts'));
   }
 
-  function wcall_scripts_method() {
+  function wp_enqueue_scripts() {
     wp_register_script('wcall', plugin_dir_url(__FILE__) . '/js/wcall.js', array('jquery'));
   }
 
   // @FIX Don't use a custom top level menu.
   // @FIX Do add configuration link to plugin menu.
-  public function wcall_menu_page() {
-    add_menu_page('Dynamic Widget', 'Dynamic Widget', 'manage_options', 'wcall-settings', array($this,'wcall_settings'));
+  public function admin_menu() {
+    add_menu_page('Remote data widgets', 'Remote data widgets', 'manage_options', 'wcall-settings', array($this, 'settings'));
   }
 
-  public function wcall_settings() {
+  public function settings() {
     require_once("views/settings.php");
   }
 }
 
-new wcall();
+new remote_data_widgets();
 
-// Register and load the widget
-function wcall_load_widget() {
-  register_widget('wcall_widget');
+// Register and load the widget.
+function remote_data_widgets_load_widget() {
+  register_widget('remote_data_widget');
 }
-add_action('widgets_init', 'wcall_load_widget');
+add_action('widgets_init', 'remote_data_widgets_load_widget');
 
 // Creating the widget
-class wcall_widget extends WP_Widget {
-  public static $base_path = 'wcall/v1';
+class remote_data_widget extends WP_Widget {
+  public static $base_path = 'remote-data-widget/v1';
   public static $update_fragment = 'getdata';
 
   function __construct() {
     parent::__construct(
 
       // Base ID of your widget
-      'wcall_widget',
+      'remote_data_widget',
 
       // Widget name will appear in UI
-      __('Wcall Widget', 'wcall_widget_domain'),
+      __('Remote data widget', 'remote_data_widget_domain'),
 
       // Widget description
-      array('description' => __('Provide remote API data to the sidebar', 'wcall_widget_domain'),)
+      array('description' => __('Provide remote API data to the sidebar', 'remote_data_widget_domain'),)
     );
 
 
@@ -72,7 +72,7 @@ class wcall_widget extends WP_Widget {
     $route = '/' . $this->_get_local_rest_route();
     register_rest_route($this::$base_path, $route, array(
       'methods' => 'POST',
-      'callback' => array($this, 'wcallgetdata_func'),
+      'callback' => array($this, 'get_remote_data'),
     ));
   }
 
@@ -104,7 +104,7 @@ class wcall_widget extends WP_Widget {
     return $default;
   }
 
-  function wcallgetdata_func() {
+  function get_remote_data() {
     $result = array('status' => false, 'msg' => "Unknown error!");
     if (isset($_POST['widgetid'])) {
       $widget_id = $_POST['widgetid'];
@@ -173,28 +173,28 @@ class wcall_widget extends WP_Widget {
       $title = $instance['title'];
     }
     else {
-      $title = __('New title', 'wcall_widget_domain');
+      $title = __('New title', 'remote_data_widget_domain');
     }
 
     if (isset($instance['pathname'])) {
       $pathname = $instance['pathname'];
     }
     else {
-      $pathname = __('', 'wcall_widget_domain');
+      $pathname = __('', 'remote_data_widget_domain');
     }
 
     if (isset($instance['initargs'])) {
       $initargs = $instance['initargs'];
     }
     else {
-      $initargs = __('', 'wcall_widget_domain');
+      $initargs = __('', 'remote_data_widget_domain');
     }
 
     if (isset($instance['cache'])) {
       $cache = $instance['cache'];
     }
     else {
-      $cache = __('', 'wcall_widget_domain');
+      $cache = __('', 'remote_data_widget_domain');
     }
     // Widget admin form
     ?>
@@ -228,6 +228,9 @@ class wcall_widget extends WP_Widget {
     $instance['pathname'] = (! empty($new_instance['pathname'])) ? strip_tags($new_instance['pathname']) : '';
     $instance['initargs'] = (! empty($new_instance['initargs'])) ? strip_tags($new_instance['initargs']) : '';
     $instance['cache'] = (! empty($new_instance['cache'])) ? strip_tags($new_instance['cache']) : '';
+
+    // Clear the transient cache.
+    delete_transient($this->id);
     return $instance;
   }
 }
