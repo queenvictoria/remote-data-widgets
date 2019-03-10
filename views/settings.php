@@ -1,13 +1,26 @@
 <?php
-if (isset($_POST['save'])) {
-  update_option( 'remote_data_widgets_remote_host', $_POST['remote_data_widgets_remote_host']);
-}
-$host = get_option("remote_data_widgets_remote_host");
+  if (isset($_POST['save'])) {
+    update_option( 'remote_data_widgets_remote_host', $_POST['remote_data_widgets_remote_host']);
+  }
+  $host = get_option("remote_data_widgets_remote_host");
+
+  $permalinks = get_option('permalink_structure');
+
 ?>
 <!-- @FIX Layout using Wordpress admin classes. -->
 <div class="container-fluid" style="margin-top:40px;">
   <div class="row">
   <h2>Remote data widgets settings</h2>
+
+  <?php
+  if ( ! $permalinks ):
+   ?>
+  <div class="notice notice-error">
+    <p>Permalinks are not enabled. The Wordpress REST API, and therefore this plugin, doesn't work without permalinks enabled. Please <a href="<?php echo admin_url( "options-permalink.php"); ?>">enable permalinks</a> of some kind.</p>
+  </div>
+  <?php
+  endif;
+   ?>
   <div>
 
   <form method="post" action="">
