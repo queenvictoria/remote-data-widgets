@@ -156,7 +156,7 @@ class remote_data_widget extends WP_Widget {
     <textarea name="placeholder"></textarea>
     <script type="text/javascript">
       jQuery(document).ready(function() {
-        new wcallcls({
+        new RemoteDataWidget({
           initargs: '<?php echo $instance['initargs']; ?>',
           widgetid: '<?php echo $this->id; ?>',
           url:      '<?php echo $url; ?>'

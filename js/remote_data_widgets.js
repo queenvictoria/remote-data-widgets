@@ -1,6 +1,6 @@
 // @FIX This must load after jQuery surely.
 // @FIX Whitespace.
-var wcallcls = function(options) {
+var RemoteDataWidget = function(options) {
   var opts = {
     initargs: null,
     widgetid: null,
@@ -14,7 +14,6 @@ var wcallcls = function(options) {
         url: opts.url,
         data: {
           remote_args: remote_args,
-          action: "wcallgetdata",
           widgetid: opts.widgetid
         }
       })
