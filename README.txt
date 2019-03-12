@@ -51,10 +51,8 @@ This plugin [requires pretty permalinks](https://stackoverflow.com/questions/442
     // ...
 
     // Customisations for these particular widgets.
-    wp_enqueue_style('Font_Awesome');
-
-    wp_enqueue_script('evs-charts');
-    wp_enqueue_style('evs-charts');
+    wp_enqueue_script('custom');
+    wp_enqueue_style('custom');
 
     // ...
   }
